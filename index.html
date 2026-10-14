@@ -1,0 +1,1751 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Giải Mật Thư Hóa Học - Hành Trình Chinh Phục Nguyên Tử</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Orbitron & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    :root {
+      --bg-dark: #060b19;
+      --card-bg: rgba(13, 23, 48, 0.78);
+      --gold: #ffb703;
+      --gold-glow: rgba(255, 183, 3, 0.45);
+      --cyan: #00f2fe;
+      --purple: #8a2be2;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg-dark);
+      color: #f1f5f9;
+      min-height: 100vh;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(138, 43, 226, 0.18) 0%, transparent 45%),
+        radial-gradient(circle at 85% 85%, rgba(0, 242, 254, 0.15) 0%, transparent 45%),
+        radial-gradient(circle at 50% 50%, rgba(255, 183, 3, 0.06) 0%, transparent 60%);
+    }
+
+    .font-orbitron {
+      font-family: 'Orbitron', monospace;
+    }
+
+    /* Glassmorphism Vault Panel */
+    .vault-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 25px rgba(0, 242, 254, 0.08);
+    }
+
+    .vault-card:hover {
+      border-color: rgba(255, 183, 3, 0.35);
+    }
+
+    /* Orbital Animation */
+    .orbital-ring {
+      position: absolute;
+      border: 1px dashed rgba(0, 242, 254, 0.3);
+      border-radius: 50%;
+      pointer-events: none;
+      animation: rotateOrbital 24s linear infinite;
+    }
+
+    @keyframes rotateOrbital {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 7px;
+      height: 7px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #090e1d;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #ffb703;
+    }
+  </style>
+</head>
+
+<body class="flex flex-col justify-between selection:bg-amber-400 selection:text-black">
+
+  <!-- Background Animated Particle Canvas -->
+  <canvas id="bg-canvas" class="fixed inset-0 pointer-events-none z-0 opacity-40"></canvas>
+
+  <header class="relative z-20 border-b border-slate-800/80 bg-slate-950/70 backdrop-blur-md px-4 py-3 sm:px-8">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <!-- Logo & Branding -->
+      <div class="flex items-center space-x-3">
+        <div class="relative w-10 h-10 flex items-center justify-center bg-gradient-to-tr from-amber-500 to-indigo-600 rounded-xl shadow-lg shadow-amber-500/20">
+          <svg class="w-6 h-6 text-slate-950" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="3" fill="currentColor"/>
+            <ellipse cx="12" cy="12" rx="9" ry="3.8" transform="rotate(30 12 12)"/>
+            <ellipse cx="12" cy="12" rx="9" ry="3.8" transform="rotate(-30 12 12)"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-lg sm:text-xl font-extrabold tracking-tight font-orbitron bg-gradient-to-r from-amber-400 via-cyan-300 to-indigo-300 bg-clip-text text-transparent">
+            ATOMIC CIPHER
+          </h1>
+          <p class="text-[10px] sm:text-xs text-slate-400 uppercase tracking-widest font-medium">Hành Trình Chinh Phục Nguyên Tử</p>
+        </div>
+      </div>
+
+      <!-- Live Contest Status / Controls -->
+      <div class="flex items-center space-x-3 sm:space-x-5">
+        <!-- Live Stopwatch Badge -->
+        <div id="live-timer-badge" class="hidden items-center bg-slate-900/90 border border-amber-500/40 px-3.5 py-1.5 rounded-full text-xs font-mono font-bold text-amber-400 shadow-inner">
+          <span class="inline-block w-2 h-2 rounded-full bg-red-500 mr-2 animate-ping"></span>
+          <span id="timer-display">00:00</span>
+        </div>
+
+        <!-- Leaderboard Trigger -->
+        <button onclick="switchScreen('leaderboard-screen')" class="flex items-center space-x-1.5 bg-slate-800/80 hover:bg-slate-700/80 text-cyan-300 hover:text-cyan-200 border border-cyan-500/30 px-3 py-1.5 rounded-lg text-xs font-semibold transition duration-200 shadow-sm">
+          <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M5 4a1 1 0 00-2 0v7.268a2 2 0 000 3.464V16a1 1 0 102 0v-1.268a2 2 0 000-3.464V4zM11 4a1 1 0 10-2 0v1.268a2 2 0 000 3.464V16a1 1 0 102 0V8.732a2 2 0 000-3.464V4zM16 3a1 1 0 011 1v7.268a2 2 0 010 3.464V16a1 1 0 11-2 0v-1.268a2 2 0 010-3.464V4a1 1 0 011-1z"/>
+          </svg>
+          <span class="hidden sm:inline">Bảng Xếp Hạng</span>
+        </button>
+
+        <!-- Teacher Mode Button -->
+        <button onclick="openAdminModal()" class="flex items-center space-x-1 bg-indigo-950/70 hover:bg-indigo-900 text-indigo-300 border border-indigo-500/30 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition" title="Khu vực Quản trị">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+          </svg>
+          <span class="hidden md:inline">Giáo Viên</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="relative z-10 flex-1 max-w-5xl mx-auto w-full p-4 sm:p-6 lg:p-8 flex items-center justify-center">
+
+    <!-- ========================================== -->
+    <!-- 1. MÀN HÌNH KHỞI ĐỘNG (WELCOME / LOGIN) -->
+    <!-- ========================================== -->
+    <section id="welcome-screen" class="w-full max-w-2xl text-center space-y-6">
+      <div class="vault-card rounded-3xl p-6 sm:p-10 relative overflow-hidden">
+        <!-- Floating decorative orbital ring -->
+        <div class="orbital-ring w-96 h-96 -top-24 -left-24"></div>
+
+        <div class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-semibold mb-3">
+          <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+          <span>THỬ THÁCH HÓA HỌC THPT • 25 ĐIỂM</span>
+        </div>
+
+        <h2 class="text-2xl sm:text-4xl font-extrabold tracking-tight text-white mb-2 font-orbitron">
+          GIẢI MẬT THƯ HÓA HỌC
+        </h2>
+        <p class="text-base sm:text-xl font-bold bg-gradient-to-r from-amber-400 to-cyan-300 bg-clip-text text-transparent mb-4">
+          HÀNH TRÌNH CHINH PHỤC NGUYÊN TỬ
+        </p>
+
+        <p class="text-slate-300 text-sm sm:text-base leading-relaxed max-w-lg mx-auto mb-8">
+          “Bốn mật thư đang chờ được giải mã. Hãy vận dụng kiến thức, tư duy logic và sự nhanh nhạy để chinh phục thử thách, giành điểm số cao nhất!”
+        </p>
+
+        <!-- Candidate Registration Form (NO EXAM CODE) -->
+        <form id="reg-form" onsubmit="handleStartGame(event)" class="space-y-4 text-left max-w-md mx-auto">
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
+              Họ và tên thí sinh / Tên đội <span class="text-rose-400">*</span>
+            </label>
+            <input type="text" id="cand-name" required placeholder="VD: Nguyễn Văn A (hoặc Đội Bứt Phá)"
+              class="w-full bg-slate-900/90 border border-slate-700 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 text-white rounded-xl px-4 py-3 text-sm outline-none transition" />
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
+                Lớp <span class="text-rose-400">*</span>
+              </label>
+              <input type="text" id="cand-class" required placeholder="VD: 10A1"
+                class="w-full bg-slate-900/90 border border-slate-700 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 text-white rounded-xl px-4 py-3 text-sm outline-none transition" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
+                Nhóm / Tổ <span class="text-rose-400">*</span>
+              </label>
+              <input type="text" id="cand-group" required placeholder="VD: Nhóm 1 (hoặc Tổ 2)"
+                class="w-full bg-slate-900/90 border border-slate-700 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 text-white rounded-xl px-4 py-3 text-sm outline-none transition" />
+            </div>
+          </div>
+
+          <div id="reg-error" class="hidden p-3 rounded-xl bg-rose-950/70 border border-rose-500/40 text-rose-300 text-xs text-center font-medium"></div>
+
+          <button type="submit" id="btn-start"
+            class="w-full mt-4 bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-extrabold text-sm sm:text-base py-3.5 px-6 rounded-xl shadow-lg shadow-amber-500/25 transition transform active:scale-95 flex items-center justify-center space-x-2">
+            <span>BẮT ĐẦU GIẢI MẬT THƯ</span>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          </button>
+        </form>
+
+        <!-- Brief info badges -->
+        <div class="grid grid-cols-4 gap-2 sm:gap-4 mt-8 pt-6 border-t border-slate-800 text-center">
+          <div class="p-2 bg-slate-900/60 rounded-xl border border-slate-800">
+            <div class="text-xs text-slate-400 font-medium">Mật thư 1</div>
+            <div class="text-xs sm:text-sm font-bold text-cyan-400">10 Điểm</div>
+          </div>
+          <div class="p-2 bg-slate-900/60 rounded-xl border border-slate-800">
+            <div class="text-xs text-slate-400 font-medium">Mật thư 2</div>
+            <div class="text-xs sm:text-sm font-bold text-cyan-400">5 Điểm</div>
+          </div>
+          <div class="p-2 bg-slate-900/60 rounded-xl border border-slate-800">
+            <div class="text-xs text-slate-400 font-medium">Mật thư 3</div>
+            <div class="text-xs sm:text-sm font-bold text-cyan-400">6 Điểm</div>
+          </div>
+          <div class="p-2 bg-slate-900/60 rounded-xl border border-slate-800">
+            <div class="text-xs text-slate-400 font-medium">Mật thư 4</div>
+            <div class="text-xs sm:text-sm font-bold text-cyan-400">4 Điểm</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- 2. GIAO DIỆN CHƠI GAME CHÍNH (4 MẬT THƯ) -->
+    <!-- ========================================== -->
+    <section id="game-screen" class="hidden w-full space-y-6">
+
+      <!-- Breadcrumbs & Quest Phase Indicator -->
+      <div class="vault-card rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex items-center space-x-3 w-full md:w-auto">
+          <div class="p-2 bg-amber-500/20 text-amber-400 rounded-lg">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+            </svg>
+          </div>
+          <div>
+            <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Học sinh / Đội đang thi</div>
+            <div class="text-sm sm:text-base font-bold text-white flex flex-wrap items-center gap-2">
+              <span id="player-badge-name">Thí sinh</span> 
+              <span class="text-xs px-2 py-0.5 rounded bg-slate-800 text-cyan-300 font-mono" id="player-badge-class">10A</span>
+              <span class="text-xs px-2 py-0.5 rounded bg-slate-800 text-amber-300 font-mono" id="player-badge-group">Nhóm 1</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4 Step Stepper -->
+        <div class="flex items-center space-x-2 sm:space-x-3 overflow-x-auto max-w-full pb-1 md:pb-0">
+          <div id="step-pill-1" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition bg-amber-500 text-slate-950 shadow-md">
+            <span>1</span>
+            <span class="hidden sm:inline">Mật thư 1</span>
+          </div>
+          <span class="text-slate-600">→</span>
+          <div id="step-pill-2" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition bg-slate-800 text-slate-400">
+            <span>2</span>
+            <span class="hidden sm:inline">Mật thư 2</span>
+          </div>
+          <span class="text-slate-600">→</span>
+          <div id="step-pill-3" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition bg-slate-800 text-slate-400">
+            <span>3</span>
+            <span class="hidden sm:inline">Mật thư 3</span>
+          </div>
+          <span class="text-slate-600">→</span>
+          <div id="step-pill-4" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition bg-slate-800 text-slate-400">
+            <span>4</span>
+            <span class="hidden sm:inline">Mật thư 4</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- MẬT THƯ 1: GIẢI MÃ KIẾN THỨC NGUYÊN TỬ (10 Đ) -->
+      <!-- ============================================== -->
+      <div id="secret-panel-1" class="vault-card rounded-3xl p-5 sm:p-8 space-y-6">
+        <div class="border-b border-slate-800 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <div class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+              MẬT THƯ 1 • TỐI ĐA 10 ĐIỂM
+            </div>
+            <h3 class="text-xl sm:text-2xl font-extrabold text-white">Giải Mã Kiến Thức Nguyên Tử</h3>
+          </div>
+          <!-- Progress Tracker -->
+          <div class="text-right">
+            <span class="text-xs text-slate-400">Tiến độ câu hỏi:</span>
+            <span id="mt1-progress-text" class="text-xs font-mono font-bold text-amber-400 ml-1">0/10</span>
+            <div class="w-32 bg-slate-800 h-2 rounded-full mt-1 overflow-hidden">
+              <div id="mt1-progress-bar" class="bg-amber-400 h-full w-0 transition-all duration-300"></div>
+            </div>
+          </div>
+        </div>
+
+        <p class="text-xs sm:text-sm text-slate-300 italic">
+          * Bạn phải chọn câu trả lời cho đầy đủ 10 câu hỏi trắc nghiệm dưới đây trước khi gửi đáp án và mở khóa mật thư kế tiếp.
+        </p>
+
+        <!-- 10 Questions Container -->
+        <div id="mt1-questions-list" class="space-y-6">
+          <!-- Populated via Javascript -->
+        </div>
+
+        <!-- Submission Trigger -->
+        <div class="pt-4 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div id="mt1-validation-msg" class="text-xs font-semibold text-rose-400 hidden">
+            ⚠️ Bạn chưa hoàn thành tất cả câu trả lời. Vui lòng kiểm tra lại trước khi tiếp tục.
+          </div>
+          <button type="button" onclick="submitSecret1()"
+            class="w-full sm:w-auto ml-auto px-8 py-3.5 bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-bold rounded-xl shadow-lg shadow-amber-500/20 transition flex items-center justify-center space-x-2">
+            <span>GỬI ĐÁP ÁN – TIẾP TỤC</span>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- MẬT THƯ 2: BÍ ẨN ĐỒNG VỊ BORON (5 ĐIỂM)        -->
+      <!-- ============================================== -->
+      <div id="secret-panel-2" class="hidden vault-card rounded-3xl p-5 sm:p-8 space-y-6">
+        <div class="border-b border-slate-800 pb-4">
+          <div class="text-xs font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+            MẬT THƯ 2 • TỐI ĐA 5 ĐIỂM
+          </div>
+          <h3 class="text-xl sm:text-2xl font-extrabold text-white">Bí Ẩn Đồng Vị Boron</h3>
+        </div>
+
+        <div class="bg-slate-900/80 border border-slate-800 p-4 sm:p-6 rounded-2xl space-y-3 leading-relaxed text-sm sm:text-base text-slate-200">
+          <p>
+            “Boron là nguyên tố có nhiều tác dụng đối với cơ thể người như: làm lành vết thương, điều hòa nội tiết sinh dục, chống viêm khớp,... Do ngọn lửa cháy có màu lục đặc biệt nên boron vô định hình được dùng làm pháo hoa. Boron có hai đồng vị là <span class="font-bold text-amber-300">¹⁰B</span> và <span class="font-bold text-amber-300">¹¹B</span>, nguyên tử khối trung bình là <span class="font-bold text-cyan-300">10,81</span>. Phần trăm số nguyên tử mỗi đồng vị ¹⁰B và ¹¹B lần lượt là bao nhiêu?”
+          </p>
+        </div>
+
+        <!-- Answer Input Field -->
+        <div class="space-y-3 max-w-lg">
+          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
+            Nhập kết quả phần trăm theo thứ tự của ¹⁰B rồi ¹¹B:
+          </label>
+          <div class="relative">
+            <input type="text" id="mt2-input" placeholder="Ví dụ: 19 và 81  hoặc  19%; 81%"
+              class="w-full bg-slate-900/90 border border-slate-700 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 text-white rounded-xl px-4 py-3.5 text-base outline-none transition" />
+          </div>
+          <p class="text-xs text-slate-400 italic">
+            * Quy ước: Nhập số phần trăm của ¹⁰B trước, sau đó đến ¹¹B. Chấp nhận các kiểu gõ tương đương: “19 và 81”, “19%; 81%”, “19, 81”.
+          </p>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="pt-4 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div id="mt2-validation-msg" class="text-xs font-semibold text-rose-400 hidden">
+            ⚠️ Bạn chưa hoàn thành tất cả câu trả lời. Vui lòng kiểm tra lại trước khi tiếp tục.
+          </div>
+          <button type="button" onclick="submitSecret2()"
+            class="w-full sm:w-auto ml-auto px-8 py-3.5 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-slate-950 font-bold rounded-xl shadow-lg shadow-cyan-500/20 transition flex items-center justify-center space-x-2">
+            <span>GỬI ĐÁP ÁN – TIẾP TỤC</span>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- MẬT THƯ 3: TRUY TÌM SỐ PROTON (6 ĐIỂM)        -->
+      <!-- ============================================== -->
+      <div id="secret-panel-3" class="hidden vault-card rounded-3xl p-5 sm:p-8 space-y-6">
+        <div class="border-b border-slate-800 pb-4">
+          <div class="text-xs font-bold uppercase tracking-wider text-purple-400 flex items-center gap-1.5">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            MẬT THƯ 3 • TỐI ĐA 6 ĐIỂM
+          </div>
+          <h3 class="text-xl sm:text-2xl font-extrabold text-white">Truy Tìm Số Proton</h3>
+        </div>
+
+        <div class="bg-slate-900/80 border border-slate-800 p-4 sm:p-6 rounded-2xl space-y-3 leading-relaxed text-sm sm:text-base text-slate-200">
+          <p>
+            “Cho nguyên tử X có tổng số hạt là <span class="font-bold text-amber-300">82</span>, trong đó số hạt mang điện âm ít hơn số hạt không mang điện là <span class="font-bold text-cyan-300">4 hạt</span>. Số proton của nguyên tử X là bao nhiêu?”
+          </p>
+        </div>
+
+        <!-- Numeric Input -->
+        <div class="space-y-3 max-w-sm">
+          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
+            Nhập số hạt proton của nguyên tử X:
+          </label>
+          <div class="relative">
+            <input type="text" id="mt3-input" inputmode="numeric" placeholder="Nhập một số nguyên..."
+              class="w-full font-mono text-lg bg-slate-900/90 border border-slate-700 focus:border-purple-400 focus:ring-1 focus:ring-purple-400 text-amber-300 rounded-xl px-4 py-3.5 outline-none transition" />
+          </div>
+          <p class="text-xs text-slate-400 italic">
+            * Chỉ điền chữ số nguyên duy nhất đại diện cho số hạt proton.
+          </p>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="pt-4 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div id="mt3-validation-msg" class="text-xs font-semibold text-rose-400 hidden">
+            ⚠️ Bạn chưa hoàn thành tất cả câu trả lời. Vui lòng kiểm tra lại trước khi tiếp tục.
+          </div>
+          <button type="button" onclick="submitSecret3()"
+            class="w-full sm:w-auto ml-auto px-8 py-3.5 bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-400 hover:to-indigo-400 text-white font-bold rounded-xl shadow-lg shadow-purple-500/20 transition flex items-center justify-center space-x-2">
+            <span>GỬI ĐÁP ÁN – TIẾP TỤC</span>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- MẬT THƯ 4: THỬ THÁCH ĐÚNG HAY SAI (4 ĐIỂM)   -->
+      <!-- ============================================== -->
+      <div id="secret-panel-4" class="hidden vault-card rounded-3xl p-5 sm:p-8 space-y-6">
+        <div class="border-b border-slate-800 pb-4">
+          <div class="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            MẬT THƯ 4 • TỐI ĐA 4 ĐIỂM (CHẶNG CUỐI)
+          </div>
+          <h3 class="text-xl sm:text-2xl font-extrabold text-white">Thử Thách Đúng Hay Sai</h3>
+        </div>
+
+        <div class="bg-slate-900/80 border border-slate-800 p-4 sm:p-6 rounded-2xl space-y-2 text-sm sm:text-base text-slate-200">
+          <p class="font-medium text-amber-300">
+            Cho nguyên tử Aluminium (nhôm) có Z = 13.
+          </p>
+          <p class="text-slate-300 text-sm">
+            Hãy xác định mỗi phát biểu sau là <strong class="text-emerald-400">Đúng</strong> hay <strong class="text-rose-400">Sai</strong>:
+          </p>
+        </div>
+
+        <!-- 4 True/False Items -->
+        <div class="space-y-4" id="mt4-items-container">
+          <!-- Item a -->
+          <div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800/80 flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div class="text-sm text-slate-200">
+              <span class="font-bold text-amber-400 mr-1.5">a)</span> Lớp K có 2 electron, lớp L có 3 electron và lớp M có 3 electron.
+            </div>
+            <div class="flex items-center space-x-2 shrink-0">
+              <button type="button" onclick="selectTF('a', 'dung')" id="btn-tf-a-dung" class="tf-btn px-4 py-2 rounded-xl text-xs font-bold border border-slate-700 bg-slate-800 text-slate-300 hover:border-emerald-500 transition">ĐÚNG</button>
+              <button type="button" onclick="selectTF('a', 'sai')" id="btn-tf-a-sai" class="tf-btn px-4 py-2 rounded-xl text-xs font-bold border border-slate-700 bg-slate-800 text-slate-300 hover:border-rose-500 transition">SAI</button>
+            </div>
+          </div>
+
+          <!-- Item b -->
+          <div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800/80 flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div class="text-sm text-slate-200">
+              <span class="font-bold text-amber-400 mr-1.5">b)</span> Lớp ngoài cùng có 1 electron nên aluminium là kim loại.
+            </div>
+            <div class="flex items-center space-x-2 shrink-0">
+              <button type="button" onclick="selectTF('b', 'dung')" id="btn-tf-b-dung" class="tf-btn px-4 py-2 rounded-xl text-xs font-bold border border-slate-700 bg-slate-800 text-slate-300 hover:border-emerald-500 transition">ĐÚNG</button>
+              <button type="button" onclick="selectTF('b', 'sai')" id="btn-tf-b-sai" class="tf-btn px-4 py-2 rounded-xl text-xs font-bold border border-slate-700 bg-slate-800 text-slate-300 hover:border-rose-500 transition">SAI</button>
+            </div>
+          </div>
+
+          <!-- Item c -->
+          <div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800/80 flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div class="text-sm text-slate-200">
+              <span class="font-bold text-amber-400 mr-1.5">c)</span> Aluminium có 13 electron.
+            </div>
+            <div class="flex items-center space-x-2 shrink-0">
+              <button type="button" onclick="selectTF('c', 'dung')" id="btn-tf-c-dung" class="tf-btn px-4 py-2 rounded-xl text-xs font-bold border border-slate-700 bg-slate-800 text-slate-300 hover:border-emerald-500 transition">ĐÚNG</button>
+              <button type="button" onclick="selectTF('c', 'sai')" id="btn-tf-c-sai" class="tf-btn px-4 py-2 rounded-xl text-xs font-bold border border-slate-700 bg-slate-800 text-slate-300 hover:border-rose-500 transition">SAI</button>
+            </div>
+          </div>
+
+          <!-- Item d -->
+          <div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800/80 flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div class="text-sm text-slate-200">
+              <span class="font-bold text-amber-400 mr-1.5">d)</span> Số orbital chứa electron của aluminium là 7.
+            </div>
+            <div class="flex items-center space-x-2 shrink-0">
+              <button type="button" onclick="selectTF('d', 'dung')" id="btn-tf-d-dung" class="tf-btn px-4 py-2 rounded-xl text-xs font-bold border border-slate-700 bg-slate-800 text-slate-300 hover:border-emerald-500 transition">ĐÚNG</button>
+              <button type="button" onclick="selectTF('d', 'sai')" id="btn-tf-d-sai" class="tf-btn px-4 py-2 rounded-xl text-xs font-bold border border-slate-700 bg-slate-800 text-slate-300 hover:border-rose-500 transition">SAI</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="pt-4 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div id="mt4-validation-msg" class="text-xs font-semibold text-rose-400 hidden">
+            ⚠️ Bạn chưa hoàn thành tất cả câu trả lời. Vui lòng kiểm tra lại trước khi tiếp tục.
+          </div>
+          <button type="button" onclick="finalizeQuest()"
+            class="w-full sm:w-auto ml-auto px-8 py-3.5 bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-extrabold rounded-xl shadow-lg shadow-emerald-500/25 transition flex items-center justify-center space-x-2">
+            <span>HOÀN THÀNH TOÀN BỘ MẬT THƯ</span>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- 3. MÀN HÌNH KẾT THÚC (SUMMARY / RESULT)   -->
+    <!-- ========================================== -->
+    <section id="result-screen" class="hidden w-full max-w-2xl text-center space-y-6">
+      <div class="vault-card rounded-3xl p-6 sm:p-10 relative overflow-hidden">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-amber-500/20 text-amber-400 mb-4 border border-amber-500/30">
+          <svg class="w-10 h-10" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1.323l3.954 1.582 1.599-.8a1 1 0 01.894 1.79l-1.233.616 1.738 5.42a1 1 0 01-.285 1.05A3.989 3.989 0 0115 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.715-5.347-3.763-1.505V17h1a1 1 0 110 2H9a1 1 0 110-2h1V6.079L6.237 7.584l1.715 5.347a1 1 0 01-.285 1.05A3.989 3.989 0 015 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.738-5.42-1.233-.617a1 1 0 01.894-1.789l1.599.8L9 4.323V3a1 1 0 011-1z" clip-rule="evenodd" />
+          </svg>
+        </div>
+
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-white mb-2 font-orbitron tracking-tight">
+          CHÚC MỪNG! BẠN ĐÃ HOÀN THÀNH HÀNH TRÌNH GIẢI MẬT THƯ!
+        </h2>
+        <p class="text-slate-300 text-sm sm:text-base max-w-lg mx-auto mb-6">
+          “Bạn đã vượt qua cả 4 thử thách Hóa học. Hãy cùng xem kết quả và vị trí của mình trên bảng xếp hạng!”
+        </p>
+
+        <!-- Summary Candidate Badge -->
+        <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 mb-6 grid grid-cols-2 sm:grid-cols-5 gap-3 text-sm">
+          <div>
+            <span class="text-slate-400 text-xs block">Thí sinh / Đội:</span>
+            <span id="res-cand-name" class="font-bold text-white text-sm sm:text-base truncate block">---</span>
+          </div>
+          <div>
+            <span class="text-slate-400 text-xs block">Lớp:</span>
+            <span id="res-cand-class" class="font-bold text-cyan-300 text-sm sm:text-base block">---</span>
+          </div>
+          <div>
+            <span class="text-slate-400 text-xs block">Nhóm / Tổ:</span>
+            <span id="res-cand-group" class="font-bold text-amber-300 text-sm sm:text-base block">---</span>
+          </div>
+          <div>
+            <span class="text-slate-400 text-xs block">Thời gian:</span>
+            <span id="res-cand-time" class="font-mono font-bold text-slate-200 text-sm sm:text-base block">--:--</span>
+          </div>
+          <div>
+            <span class="text-slate-400 text-xs block">Thứ hạng:</span>
+            <span id="res-cand-rank" class="font-bold text-emerald-400 text-sm sm:text-base block">#1</span>
+          </div>
+        </div>
+
+        <!-- Detailed Score Breakdown -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+          <div class="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
+            <div class="text-[11px] text-slate-400">Mật thư 1</div>
+            <div class="text-lg font-bold text-amber-400"><span id="res-score-1">0</span>/10</div>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
+            <div class="text-[11px] text-slate-400">Mật thư 2</div>
+            <div class="text-lg font-bold text-cyan-400"><span id="res-score-2">0</span>/5</div>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
+            <div class="text-[11px] text-slate-400">Mật thư 3</div>
+            <div class="text-lg font-bold text-purple-400"><span id="res-score-3">0</span>/6</div>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
+            <div class="text-[11px] text-slate-400">Mật thư 4</div>
+            <div class="text-lg font-bold text-emerald-400"><span id="res-score-4">0</span>/4</div>
+          </div>
+        </div>
+
+        <!-- Total Highlights -->
+        <div class="p-4 rounded-2xl bg-gradient-to-r from-amber-500/20 via-yellow-500/10 to-amber-500/20 border border-amber-500/40 mb-8">
+          <div class="text-xs font-bold uppercase tracking-wider text-amber-400 mb-1">TỔNG ĐIỂM CHUNG CUỘC</div>
+          <div class="text-4xl sm:text-5xl font-black font-orbitron text-amber-300">
+            <span id="res-total-score">0</span> <span class="text-xl font-normal text-slate-400">/ 25</span>
+          </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+          <button type="button" onclick="switchScreen('leaderboard-screen')"
+            class="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-slate-950 font-extrabold rounded-xl shadow-lg shadow-cyan-500/20 transition flex items-center justify-center space-x-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            <span>XEM BẢNG XẾP HẠNG</span>
+          </button>
+        </div>
+
+        <p class="text-[11px] text-slate-400 mt-5">
+          🔒 Kết quả đã được hệ thống lưu trữ an toàn. Học sinh không thể làm lại trong cùng phiên dự thi.
+        </p>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- 4. TRANG BẢNG XẾP HẠNG (LEADERBOARD)      -->
+    <!-- ========================================== -->
+    <section id="leaderboard-screen" class="hidden w-full space-y-6">
+      <div class="vault-card rounded-3xl p-5 sm:p-8 space-y-6">
+        
+        <div class="flex flex-col md:flex-row md:items-center justify-between pb-4 border-b border-slate-800 gap-4">
+          <div>
+            <div class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+              <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+              VINH DANH NHỮNG NHÀ GIẢI MÃ
+            </div>
+            <h2 class="text-xl sm:text-2xl font-extrabold text-white">BẢNG XẾP HẠNG – NHỮNG NHÀ GIẢI MÃ XUẤT SẮC</h2>
+          </div>
+
+          <div class="flex items-center space-x-2">
+            <button onclick="renderLeaderboard()" class="p-2 bg-slate-800/80 hover:bg-slate-700 text-cyan-300 rounded-xl border border-slate-700 text-xs font-semibold flex items-center gap-1.5 transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.03 0 01-15.357-2m15.357 2H15"/></svg>
+              <span>Làm mới</span>
+            </button>
+            <button onclick="handleBackFromLeaderboard()" class="px-3.5 py-2 bg-slate-800/80 hover:bg-slate-700 text-slate-300 rounded-xl border border-slate-700 text-xs font-semibold transition">
+              Quay lại
+            </button>
+          </div>
+        </div>
+
+        <!-- Sync status banner -->
+        <div id="sync-notice-banner" class="text-xs p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-slate-300 flex items-center justify-between">
+          <span class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            <span id="sync-status-text">Đang đồng bộ dữ liệu thi đấu thực tế.</span>
+          </span>
+          <span class="text-[11px] text-slate-500 font-mono" id="last-sync-time">Vừa cập nhật</span>
+        </div>
+
+        <!-- Table Responsive Wrapper -->
+        <div class="overflow-x-auto rounded-2xl border border-slate-800/80">
+          <table class="w-full text-left text-xs sm:text-sm">
+            <thead class="bg-slate-950/80 text-slate-400 uppercase tracking-wider text-[11px] font-semibold">
+              <tr>
+                <th class="py-3 px-3 sm:px-4 text-center">Hạng</th>
+                <th class="py-3 px-3 sm:px-4">Họ và tên / Đội</th>
+                <th class="py-3 px-2 sm:px-3 text-center">Lớp</th>
+                <th class="py-3 px-2 sm:px-3 text-center">Nhóm</th>
+                <th class="py-3 px-2 text-center hidden md:table-cell">MT1 (10đ)</th>
+                <th class="py-3 px-2 text-center hidden md:table-cell">MT2 (5đ)</th>
+                <th class="py-3 px-2 text-center hidden md:table-cell">MT3 (6đ)</th>
+                <th class="py-3 px-2 text-center hidden md:table-cell">MT4 (4đ)</th>
+                <th class="py-3 px-3 sm:px-4 text-center font-bold text-amber-300">Tổng Điểm</th>
+                <th class="py-3 px-3 text-center">Thời Gian</th>
+                <th class="py-3 px-3 text-right hidden lg:table-cell">Thời Điểm Nộp</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboard-body" class="divide-y divide-slate-800/60 bg-slate-900/40">
+              <!-- Dynamically rendered -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty state placeholder -->
+        <div id="leaderboard-empty" class="hidden text-center py-12 text-slate-400 text-sm">
+          Chưa có thí sinh nào hoàn thành toàn bộ 4 mật thư. Hãy là người đầu tiên ghi danh!
+        </div>
+
+        <p class="text-[11px] text-slate-400 italic text-center">
+          * Quy tắc xếp hạng: Tổng điểm cao hơn xếp trên → Bằng điểm thì ai nhanh hơn xếp trên → Bằng thời gian thì ai nộp sớm hơn xếp trên.
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============================================== -->
+  <!-- 5. KHU VỰC QUẢN TRỊ GIÁO VIÊN (ADMIN MODAL)    -->
+  <!-- ============================================== -->
+  <div id="admin-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="vault-card rounded-3xl max-w-3xl w-full p-6 sm:p-8 max-h-[90vh] overflow-y-auto space-y-6">
+      
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center space-x-2">
+          <div class="p-1.5 bg-indigo-500/20 text-indigo-400 rounded-lg">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          </div>
+          <h3 class="text-lg sm:text-xl font-bold text-white">Chế Độ Quản Trị Giáo Viên</h3>
+        </div>
+        <button onclick="closeAdminModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <!-- Auth Gate -->
+      <div id="admin-auth-panel" class="space-y-4 max-w-sm mx-auto text-center py-6">
+        <p class="text-xs text-slate-300">Nhập mật khẩu quản trị giáo viên để quản lý kết quả thi.</p>
+        <div class="relative">
+          <input type="password" id="admin-pwd-input" placeholder="Nhập mật khẩu..."
+            class="w-full text-center bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:border-amber-400 outline-none text-white" />
+        </div>
+        <button onclick="verifyAdminPassword()"
+          class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 font-bold text-white text-xs rounded-xl transition shadow">
+          XÁC THỰC QUẢN TRỊ
+        </button>
+        <p class="text-[11px] text-slate-400 italic">Mật khẩu mặc định: <span class="font-mono text-amber-300 font-bold">GV2026</span></p>
+      </div>
+
+      <!-- Authenticated Admin Control Panel -->
+      <div id="admin-dashboard-panel" class="hidden space-y-6">
+        
+        <!-- Tab Navigation -->
+        <div class="flex space-x-2 border-b border-slate-800 text-xs font-semibold">
+          <button onclick="switchAdminTab('tab-candidates')" id="btn-tab-cand" class="py-2 px-3 border-b-2 border-amber-400 text-amber-300">Danh sách bài nộp</button>
+          <button onclick="switchAdminTab('tab-cloud')" id="btn-tab-cloud" class="py-2 px-3 border-b-2 border-transparent text-slate-400 hover:text-white">Tích hợp Google Sheets</button>
+        </div>
+
+        <!-- Tab 1: Candidates & Export -->
+        <div id="tab-candidates" class="space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <span class="text-xs text-slate-300">Tổng số lượt hoàn thành: <strong id="admin-cand-count" class="text-amber-400 font-mono">0</strong></span>
+            <div class="flex items-center space-x-2">
+              <button onclick="exportResultsCSV()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                <span>Xuất file Excel/CSV</span>
+              </button>
+              <button onclick="confirmResetAllData()" class="px-3 py-1.5 bg-rose-900/60 hover:bg-rose-800 text-rose-300 border border-rose-700/60 rounded-lg text-xs font-bold transition">
+                Xóa tất cả dữ liệu
+              </button>
+            </div>
+          </div>
+
+          <div class="max-h-60 overflow-y-auto border border-slate-800 rounded-xl">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-950 text-slate-400">
+                <tr>
+                  <th class="p-2">Họ tên / Đội</th>
+                  <th class="p-2">Lớp</th>
+                  <th class="p-2">Nhóm</th>
+                  <th class="p-2">Điểm (MT1/2/3/4)</th>
+                  <th class="p-2 font-bold text-amber-300">Tổng</th>
+                  <th class="p-2">Thời gian</th>
+                </tr>
+              </thead>
+              <tbody id="admin-table-body" class="divide-y divide-slate-800 text-slate-200">
+                <!-- Data populated via js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tab 2: Google Sheets & Apps Script Bridge -->
+        <div id="tab-cloud" class="hidden space-y-4 text-xs">
+          <p class="text-slate-300">
+            Dán đường dẫn <strong class="text-cyan-300">Google Apps Script Web App URL</strong> vào đây nếu muốn tự động đồng bộ kết quả thi vào bảng tính Google Sheets của giáo viên:
+          </p>
+          <div>
+            <label class="block text-[11px] text-slate-400 mb-1">Apps Script Web App URL:</label>
+            <input type="text" id="script-url-input" placeholder="https://script.google.com/macros/s/.../exec"
+              class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 font-mono text-cyan-300 text-xs" />
+          </div>
+          <button onclick="saveAppsScriptUrl()" class="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl">
+            Lưu Cấu Hình
+          </button>
+
+          <!-- Apps Script Code Template -->
+          <div class="mt-4 pt-4 border-t border-slate-800 space-y-2">
+            <span class="font-bold text-amber-300">Mã Google Apps Script (tự động nhận dữ liệu):</span>
+            <div class="relative">
+              <textarea readonly class="w-full h-28 bg-slate-950 border border-slate-800 p-2 text-[10px] font-mono text-slate-300 rounded-lg outline-none select-all">
+function doPost(e) {
+  var lock = LockService.getScriptLock();
+  lock.tryLock(10000);
+  try {
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    var data = JSON.parse(e.postData.contents);
+    if (sheet.getLastRow() === 0) {
+      sheet.appendRow(["Thời gian nộp", "Họ Tên / Đội", "Lớp", "Nhóm", "MT1", "MT2", "MT3", "MT4", "Tổng Điểm", "Thời Gian Làm"]);
+    }
+    sheet.appendRow([data.timestamp, data.name, data.className, data.group, data.mt1, data.mt2, data.mt3, data.mt4, data.total, data.duration]);
+    return ContentService.createTextOutput(JSON.stringify({result: "success"})).setMimeType(ContentService.MimeType.JSON);
+  } catch(err) {
+    return ContentService.createTextOutput(JSON.stringify({result: "error", error: err})).setMimeType(ContentService.MimeType.JSON);
+  } finally {
+    lock.releaseLock();
+  }
+}</textarea>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Dialog Modal -->
+  <div id="msg-modal" class="hidden fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+    <div class="vault-card rounded-2xl max-w-sm w-full p-6 text-center space-y-4 border border-amber-500/30">
+      <div id="msg-modal-icon" class="w-12 h-12 mx-auto rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+      </div>
+      <h4 id="msg-modal-title" class="text-base font-bold text-white">Thông Báo</h4>
+      <p id="msg-modal-desc" class="text-xs text-slate-300 leading-relaxed"></p>
+      <button onclick="closeMsgModal()" class="w-full py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-xs transition">
+        ĐÃ HIỂU
+      </button>
+    </div>
+  </div>
+
+  <footer class="relative z-10 border-t border-slate-900 bg-slate-950/80 text-center py-4 px-4 text-xs text-slate-400">
+    <div class="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+      <p>© 2026 Bộ môn Hóa học THPT • Giải Mật Thư Hóa Học</p>
+      <p class="text-[11px] text-slate-400">Kiến thức: Cấu tạo nguyên tử, đồng vị, cấu hình electron &amp; orbital</p>
+    </div>
+  </footer>
+
+  <script>
+    /* ============================================================
+       1. SYNTHESIZED WEB AUDIO
+       ============================================================ */
+    const SoundEngine = {
+      ctx: null,
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) this.ctx = new AudioContext();
+        }
+      },
+      playClick() {
+        try {
+          this.init();
+          if (!this.ctx) return;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(440, this.ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(110, this.ctx.currentTime + 0.05);
+          gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+          gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.05);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + 0.05);
+        } catch(e) {}
+      },
+      playSuccess() {
+        try {
+          this.init();
+          if (!this.ctx) return;
+          const notes = [523.25, 659.25, 783.99, 1046.50];
+          notes.forEach((freq, idx) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.09);
+            gain.gain.setValueAtTime(0.12, this.ctx.currentTime + idx * 0.09);
+            gain.gain.linearRampToValueAtTime(0.001, this.ctx.currentTime + idx * 0.09 + 0.25);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(this.ctx.currentTime + idx * 0.09);
+            osc.stop(this.ctx.currentTime + idx * 0.09 + 0.25);
+          });
+        } catch(e) {}
+      },
+      playError() {
+        try {
+          this.init();
+          if (!this.ctx) return;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(180, this.ctx.currentTime);
+          osc.frequency.linearRampToValueAtTime(110, this.ctx.currentTime + 0.2);
+          gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+          gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.2);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + 0.2);
+        } catch(e) {}
+      }
+    };
+
+    /* ============================================================
+       2. OFFICIAL QUESTIONS AND VALIDATION MATRIX
+       ============================================================ */
+    const SECRET_1_QUESTIONS = [
+      {
+        id: 1,
+        question: "Các hạt cấu tạo nên hạt nhân của hầu hết nguyên tử là:",
+        options: [
+          { key: "A", text: "Electron và neutron." },
+          { key: "B", text: "Electron, proton và neutron." },
+          { key: "C", text: "Proton và neutron." },
+          { key: "D", text: "Electron và proton." }
+        ],
+        answer: "C"
+      },
+      {
+        id: 2,
+        question: "Nguyên tử P có Z = 15, A = 31 nên nguyên tử P có:",
+        options: [
+          { key: "A", text: "15 hạt proton, 16 hạt electron, 31 hạt neutron." },
+          { key: "B", text: "15 hạt electron, 31 hạt neutron, 15 hạt proton." },
+          { key: "C", text: "15 hạt proton, 15 hạt electron, 16 hạt neutron." },
+          { key: "D", text: "Khối lượng nguyên tử là 46 amu." }
+        ],
+        answer: "C"
+      },
+      {
+        id: 3,
+        question: "Số đơn vị điện tích hạt nhân của nguyên tử có kí hiệu ₁₁²³Na là:",
+        options: [
+          { key: "A", text: "23." },
+          { key: "B", text: "24." },
+          { key: "C", text: "25." },
+          { key: "D", text: "11." }
+        ],
+        answer: "D"
+      },
+      {
+        id: 4,
+        question: "Nhóm các nguyên tử nào dưới đây thuộc cùng một nguyên tố hóa học (các đồng vị có cùng số Z)?",
+        options: [
+          { key: "A", text: "₆¹²X và ₆¹³Y" },
+          { key: "B", text: "₆¹²X và ₇¹⁴Y" },
+          { key: "C", text: "₈¹⁶X và ₉¹⁹Y" },
+          { key: "D", text: "₁₁²³X và ₁₂²⁴Y" }
+        ],
+        answer: "A"
+      },
+      {
+        id: 5,
+        question: "Oxygen có 3 đồng vị: ¹⁶O, ¹⁷O, ¹⁸O; Hydrogen có 2 đồng vị: ¹H, ²H. Số phân tử H₂O tối đa có thể tạo thành là:",
+        options: [
+          { key: "A", text: "6." },
+          { key: "B", text: "7." },
+          { key: "C", text: "8." },
+          { key: "D", text: "9." }
+        ],
+        answer: "D"
+      },
+      {
+        id: 6,
+        question: "Dãy nào dưới đây gồm các đồng vị của cùng một nguyên tố hóa học?",
+        options: [
+          { key: "A", text: "₁¹H, ₁²H, ₁³H" },
+          { key: "B", text: "₁²H, ₂⁴He, ₃⁶Li" },
+          { key: "C", text: "₆¹²C, ₇¹⁴N, ₈¹⁶O" },
+          { key: "D", text: "₁₁²³Na, ₁₂²⁴Mg, ₁₃²⁷Al" }
+        ],
+        answer: "A"
+      },
+      {
+        id: 7,
+        question: "Chlorine có hai đồng vị là ³⁵Cl (chiếm 75,77%) và ³⁷Cl (chiếm 24,23%). Nguyên tử khối trung bình của Chlorine xấp xỉ là:",
+        options: [
+          { key: "A", text: "37,5." },
+          { key: "B", text: "35,5." },
+          { key: "C", text: "35,0." },
+          { key: "D", text: "35,1." }
+        ],
+        answer: "B"
+      },
+      {
+        id: 8,
+        question: "Số electron tối đa trong phân lớp p là:",
+        options: [
+          { key: "A", text: "2." },
+          { key: "B", text: "10." },
+          { key: "C", text: "6." },
+          { key: "D", text: "14." }
+        ],
+        answer: "C"
+      },
+      {
+        id: 9,
+        question: "Phát biểu nào sau đây đúng?",
+        options: [
+          { key: "A", text: "Các electron trên cùng một lớp có mức năng lượng bằng nhau." },
+          { key: "B", text: "Lớp K là lớp xa hạt nhân nhất." },
+          { key: "C", text: "Các electron trên cùng phân lớp có mức năng lượng bằng nhau." },
+          { key: "D", text: "Lớp M có 3 orbital." }
+        ],
+        answer: "C"
+      },
+      {
+        id: 10,
+        question: "Cấu hình electron nào dưới đây viết sai (không tuân theo quy tắc điền mức năng lượng ở trạng thái cơ bản)?",
+        options: [
+          { key: "A", text: "1s² 2s² 2p⁶ 3s² 3p⁶ 4s² 3d⁶" },
+          { key: "B", text: "1s² 2s² 2p⁵" },
+          { key: "C", text: "1s² 2s² 2p⁶ 3s¹" },
+          { key: "D", text: "1s² 2s² 2p⁶ 3s² 3p⁵" }
+        ],
+        answer: "A"
+      }
+    ];
+
+    /* ============================================================
+       3. STORAGE KEYS & APP STATE MANAGEMENT
+       ============================================================ */
+    const STORAGE_KEY_SESSION = "ATOMIC_QUEST_SESSION_2026_V2";
+    const STORAGE_KEY_LEADERBOARD = "ATOMIC_QUEST_LEADERBOARD_2026_V2";
+    const STORAGE_KEY_SETTINGS = "ATOMIC_QUEST_SETTINGS_2026_V2";
+
+    let AppState = {
+      name: "",
+      className: "",
+      group: "",
+      startTime: null,
+      endTime: null,
+      currentStep: 1,
+      isFinished: false,
+      answers: {
+        mt1: {},
+        mt2: "",
+        mt3: "",
+        mt4: {}
+      },
+      scores: {
+        mt1: 0,
+        mt2: 0,
+        mt3: 0,
+        mt4: 0,
+        total: 0
+      }
+    };
+
+    let timerInterval = null;
+
+    /* ============================================================
+       4. INITIALIZATION & RECOVERY ENGINE
+       ============================================================ */
+    window.onload = function() {
+      initBackgroundCanvas();
+      restoreSavedSession();
+      renderSecret1Questions();
+    };
+
+    function restoreSavedSession() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY_SESSION);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed && parsed.name && parsed.startTime) {
+            AppState = parsed;
+            document.getElementById('player-badge-name').textContent = AppState.name;
+            document.getElementById('player-badge-class').textContent = AppState.className;
+            document.getElementById('player-badge-group').textContent = AppState.group || "Nhóm 1";
+
+            if (AppState.isFinished) {
+              displayFinalResultScreen();
+            } else {
+              startTimerClock(AppState.startTime);
+              switchScreen('game-screen');
+              goToSecretStep(AppState.currentStep);
+              restoreFormState();
+            }
+          }
+        }
+      } catch (err) {
+        console.warn("Could not restore session:", err);
+      }
+    }
+
+    function saveSessionLocally() {
+      try {
+        localStorage.setItem(STORAGE_KEY_SESSION, JSON.stringify(AppState));
+      } catch(e) {}
+    }
+
+    function renderSecret1Questions() {
+      const container = document.getElementById('mt1-questions-list');
+      container.innerHTML = "";
+
+      SECRET_1_QUESTIONS.forEach((q) => {
+        const qCard = document.createElement('div');
+        qCard.className = "p-4 sm:p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 space-y-3";
+        qCard.innerHTML = `
+          <div class="flex items-start gap-2">
+            <span class="inline-flex items-center justify-center w-6 h-6 rounded-lg bg-amber-500/20 text-amber-300 font-bold text-xs shrink-0 mt-0.5">${q.id}</span>
+            <p class="text-sm sm:text-base font-semibold text-slate-100">${q.question}</p>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+            ${q.options.map(opt => `
+              <button type="button" 
+                id="q${q.id}-opt-${opt.key}"
+                onclick="selectMT1Option(${q.id}, '${opt.key}')" 
+                class="q-opt-btn text-left p-3 rounded-xl border border-slate-800 bg-slate-950/60 hover:bg-slate-800/80 text-xs sm:text-sm text-slate-300 transition flex items-center space-x-2">
+                <span class="w-6 h-6 rounded-md bg-slate-800 flex items-center justify-center font-bold text-xs text-amber-400 shrink-0 opt-key-badge">${opt.key}</span>
+                <span class="flex-1">${opt.text}</span>
+              </button>
+            `).join('')}
+          </div>
+        `;
+        container.appendChild(qCard);
+      });
+      updateMT1Progress();
+    }
+
+    function selectMT1Option(questionId, optionKey) {
+      SoundEngine.playClick();
+      AppState.answers.mt1[questionId] = optionKey;
+      saveSessionLocally();
+
+      const opts = ["A", "B", "C", "D"];
+      opts.forEach(k => {
+        const btn = document.getElementById(`q${questionId}-opt-${k}`);
+        if (btn) {
+          btn.classList.remove('border-amber-400', 'bg-amber-500/20', 'text-amber-200');
+          btn.classList.add('border-slate-800', 'bg-slate-950/60', 'text-slate-300');
+        }
+      });
+
+      const selectedBtn = document.getElementById(`q${questionId}-opt-${optionKey}`);
+      if (selectedBtn) {
+        selectedBtn.classList.remove('border-slate-800', 'bg-slate-950/60', 'text-slate-300');
+        selectedBtn.classList.add('border-amber-400', 'bg-amber-500/20', 'text-amber-200');
+      }
+
+      updateMT1Progress();
+      document.getElementById('mt1-validation-msg').classList.add('hidden');
+    }
+
+    function updateMT1Progress() {
+      const answeredCount = Object.keys(AppState.answers.mt1).length;
+      document.getElementById('mt1-progress-text').textContent = `${answeredCount}/10`;
+      document.getElementById('mt1-progress-bar').style.width = `${(answeredCount / 10) * 100}%`;
+    }
+
+    function selectTF(itemKey, value) {
+      SoundEngine.playClick();
+      AppState.answers.mt4[itemKey] = value;
+      saveSessionLocally();
+
+      const dungBtn = document.getElementById(`btn-tf-${itemKey}-dung`);
+      const saiBtn = document.getElementById(`btn-tf-${itemKey}-sai`);
+
+      dungBtn.className = "tf-btn px-4 py-2 rounded-xl text-xs font-bold border border-slate-700 bg-slate-800 text-slate-300 transition";
+      saiBtn.className = "tf-btn px-4 py-2 rounded-xl text-xs font-bold border border-slate-700 bg-slate-800 text-slate-300 transition";
+
+      if (value === 'dung') {
+        dungBtn.className = "tf-btn px-4 py-2 rounded-xl text-xs font-bold border border-emerald-400 bg-emerald-500/25 text-emerald-300 shadow-md transition";
+      } else if (value === 'sai') {
+        saiBtn.className = "tf-btn px-4 py-2 rounded-xl text-xs font-bold border border-rose-400 bg-rose-500/25 text-rose-300 shadow-md transition";
+      }
+
+      document.getElementById('mt4-validation-msg').classList.add('hidden');
+    }
+
+    function restoreFormState() {
+      if (AppState.answers.mt1) {
+        for (let qId in AppState.answers.mt1) {
+          selectMT1Option(qId, AppState.answers.mt1[qId]);
+        }
+      }
+      if (AppState.answers.mt2) {
+        document.getElementById('mt2-input').value = AppState.answers.mt2;
+      }
+      if (AppState.answers.mt3) {
+        document.getElementById('mt3-input').value = AppState.answers.mt3;
+      }
+      if (AppState.answers.mt4) {
+        for (let key in AppState.answers.mt4) {
+          selectTF(key, AppState.answers.mt4[key]);
+        }
+      }
+    }
+
+    /* ============================================================
+       5. START GAME HANDLER (NO EXAM CODE)
+       ============================================================ */
+    function handleStartGame(e) {
+      e.preventDefault();
+      SoundEngine.playClick();
+
+      const name = document.getElementById('cand-name').value.trim();
+      const className = document.getElementById('cand-class').value.trim();
+      const group = document.getElementById('cand-group').value.trim();
+      const errBox = document.getElementById('reg-error');
+
+      if (!name || !className || !group) {
+        errBox.textContent = "Vui lòng nhập đầy đủ: Họ tên, Lớp và Nhóm/Tổ để bắt đầu.";
+        errBox.classList.remove('hidden');
+        SoundEngine.playError();
+        return;
+      }
+
+      errBox.classList.add('hidden');
+
+      // Initialize AppState
+      AppState.name = name;
+      AppState.className = className;
+      AppState.group = group;
+      AppState.startTime = Date.now();
+      AppState.currentStep = 1;
+      AppState.isFinished = false;
+      AppState.answers = { mt1: {}, mt2: "", mt3: "", mt4: {} };
+      AppState.scores = { mt1: 0, mt2: 0, mt3: 0, mt4: 0, total: 0 };
+      saveSessionLocally();
+
+      // UI Init
+      document.getElementById('player-badge-name').textContent = name;
+      document.getElementById('player-badge-class').textContent = className;
+      document.getElementById('player-badge-group').textContent = group;
+      startTimerClock(AppState.startTime);
+      goToSecretStep(1);
+      switchScreen('game-screen');
+      SoundEngine.playSuccess();
+    }
+
+    function startTimerClock(startTime) {
+      if (timerInterval) clearInterval(timerInterval);
+      const timerBadge = document.getElementById('live-timer-badge');
+      const timerDisplay = document.getElementById('timer-display');
+      timerBadge.classList.remove('hidden');
+      timerBadge.classList.add('flex');
+
+      function update() {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        const mins = Math.floor(elapsed / 60);
+        const secs = elapsed % 60;
+        timerDisplay.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+      }
+
+      update();
+      timerInterval = setInterval(update, 1000);
+    }
+
+    function formatTimeDuration(totalSeconds) {
+      const mins = Math.floor(totalSeconds / 60);
+      const secs = totalSeconds % 60;
+      if (mins > 60) {
+        const hrs = Math.floor(mins / 60);
+        const remMins = mins % 60;
+        return `${hrs} giờ ${remMins} phút ${secs} giây`;
+      }
+      return `${mins} phút ${secs} giây`;
+    }
+
+    /* ============================================================
+       6. SEQUENTIAL PROGRESSION LOGIC (MẬT THƯ 1 -> 4)
+       ============================================================ */
+    function goToSecretStep(stepNumber) {
+      AppState.currentStep = stepNumber;
+      saveSessionLocally();
+
+      for (let i = 1; i <= 4; i++) {
+        document.getElementById(`secret-panel-${i}`).classList.add('hidden');
+        const pill = document.getElementById(`step-pill-${i}`);
+        pill.className = "flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition bg-slate-800 text-slate-400";
+      }
+
+      const activePanel = document.getElementById(`secret-panel-${stepNumber}`);
+      if (activePanel) {
+        activePanel.classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      const activePill = document.getElementById(`step-pill-${stepNumber}`);
+      if (activePill) {
+        activePill.className = "flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition bg-amber-500 text-slate-950 shadow-md";
+      }
+    }
+
+    function submitSecret1() {
+      const answeredCount = Object.keys(AppState.answers.mt1).length;
+      if (answeredCount < 10) {
+        document.getElementById('mt1-validation-msg').classList.remove('hidden');
+        SoundEngine.playError();
+        return;
+      }
+      document.getElementById('mt1-validation-msg').classList.add('hidden');
+      SoundEngine.playSuccess();
+      goToSecretStep(2);
+    }
+
+    function submitSecret2() {
+      const rawVal = document.getElementById('mt2-input').value.trim();
+      if (!rawVal) {
+        document.getElementById('mt2-validation-msg').classList.remove('hidden');
+        SoundEngine.playError();
+        return;
+      }
+      AppState.answers.mt2 = rawVal;
+      saveSessionLocally();
+      document.getElementById('mt2-validation-msg').classList.add('hidden');
+      SoundEngine.playSuccess();
+      goToSecretStep(3);
+    }
+
+    function submitSecret3() {
+      const rawVal = document.getElementById('mt3-input').value.trim();
+      if (!rawVal) {
+        document.getElementById('mt3-validation-msg').classList.remove('hidden');
+        SoundEngine.playError();
+        return;
+      }
+      AppState.answers.mt3 = rawVal;
+      saveSessionLocally();
+      document.getElementById('mt3-validation-msg').classList.add('hidden');
+      SoundEngine.playSuccess();
+      goToSecretStep(4);
+    }
+
+    function evaluateAllAnswers() {
+      let s1 = 0;
+      let s2 = 0;
+      let s3 = 0;
+      let s4 = 0;
+
+      // Grade MT1
+      SECRET_1_QUESTIONS.forEach(q => {
+        if (AppState.answers.mt1[q.id] === q.answer) {
+          s1 += 1;
+        }
+      });
+
+      // Grade MT2 (10B = 19%, 11B = 81%) -> 5 điểm
+      const mt2Raw = (AppState.answers.mt2 || "").trim().toLowerCase();
+      const numbersInMT2 = mt2Raw.match(/\d+(\.\d+)?/g);
+      if (numbersInMT2 && numbersInMT2.length >= 2) {
+        const first = Math.round(parseFloat(numbersInMT2[0]));
+        const second = Math.round(parseFloat(numbersInMT2[1]));
+        if (first === 19 && second === 81) {
+          s2 = 5;
+        }
+      }
+
+      // Grade MT3 (p = 26) -> 6 điểm
+      const mt3Raw = (AppState.answers.mt3 || "").trim();
+      const numMT3 = parseInt(mt3Raw, 10);
+      if (numMT3 === 26) {
+        s3 = 6;
+      }
+
+      // Grade MT4 (a: Sai, b: Sai, c: Đúng, d: Đúng)
+      const expectedMT4 = { a: "sai", b: "sai", c: "dung", d: "dung" };
+      for (let key of ["a", "b", "c", "d"]) {
+        if (AppState.answers.mt4[key] === expectedMT4[key]) {
+          s4 += 1;
+        }
+      }
+
+      const total = s1 + s2 + s3 + s4;
+      return { mt1: s1, mt2: s2, mt3: s3, mt4: s4, total: total };
+    }
+
+    function finalizeQuest() {
+      const keys = ["a", "b", "c", "d"];
+      const answeredKeys = Object.keys(AppState.answers.mt4);
+      if (answeredKeys.length < 4 || keys.some(k => !AppState.answers.mt4[k])) {
+        document.getElementById('mt4-validation-msg').classList.remove('hidden');
+        SoundEngine.playError();
+        return;
+      }
+
+      document.getElementById('mt4-validation-msg').classList.add('hidden');
+      if (timerInterval) clearInterval(timerInterval);
+
+      AppState.endTime = Date.now();
+      AppState.isFinished = true;
+      AppState.scores = evaluateAllAnswers();
+      saveSessionLocally();
+
+      try {
+        if (window.confetti) {
+          confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+        }
+      } catch(e) {}
+
+      SoundEngine.playSuccess();
+      persistRecordToLeaderboard();
+      displayFinalResultScreen();
+    }
+
+    function displayFinalResultScreen() {
+      const durationSec = Math.max(1, Math.floor((AppState.endTime - AppState.startTime) / 1000));
+      const formattedDuration = formatTimeDuration(durationSec);
+
+      document.getElementById('res-cand-name').textContent = AppState.name;
+      document.getElementById('res-cand-class').textContent = AppState.className;
+      document.getElementById('res-cand-group').textContent = AppState.group;
+      document.getElementById('res-cand-time').textContent = formattedDuration;
+
+      document.getElementById('res-score-1').textContent = AppState.scores.mt1;
+      document.getElementById('res-score-2').textContent = AppState.scores.mt2;
+      document.getElementById('res-score-3').textContent = AppState.scores.mt3;
+      document.getElementById('res-score-4').textContent = AppState.scores.mt4;
+      document.getElementById('res-total-score').textContent = AppState.scores.total;
+
+      const lb = getStoredLeaderboard();
+      const myRank = lb.findIndex(entry => entry.name === AppState.name && entry.className === AppState.className && entry.group === AppState.group) + 1;
+      document.getElementById('res-cand-rank').textContent = myRank > 0 ? `#${myRank}` : "#1";
+
+      switchScreen('result-screen');
+    }
+
+    /* ============================================================
+       7. LEADERBOARD REPOSITORY & DATA PERSISTENCE
+       ============================================================ */
+    function getStoredLeaderboard() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY_LEADERBOARD);
+        return raw ? JSON.parse(raw) : [];
+      } catch(e) {
+        return [];
+      }
+    }
+
+    function sortLeaderboardArray(arr) {
+      return arr.sort((a, b) => {
+        if (b.total !== a.total) {
+          return b.total - a.total;
+        }
+        if (a.durationSec !== b.durationSec) {
+          return a.durationSec - b.durationSec;
+        }
+        return a.timestamp - b.timestamp;
+      });
+    }
+
+    function persistRecordToLeaderboard() {
+      let list = getStoredLeaderboard();
+      const durationSec = Math.max(1, Math.floor((AppState.endTime - AppState.startTime) / 1000));
+
+      const newRecord = {
+        name: AppState.name,
+        className: AppState.className,
+        group: AppState.group,
+        mt1: AppState.scores.mt1,
+        mt2: AppState.scores.mt2,
+        mt3: AppState.scores.mt3,
+        mt4: AppState.scores.mt4,
+        total: AppState.scores.total,
+        durationSec: durationSec,
+        durationFormatted: formatTimeDuration(durationSec),
+        timestamp: AppState.endTime,
+        submittedAt: new Date(AppState.endTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit', day: '2-digit', month: '2-digit' })
+      };
+
+      const idx = list.findIndex(item => item.name === newRecord.name && item.className === newRecord.className && item.group === newRecord.group);
+      if (idx >= 0) {
+        list[idx] = newRecord;
+      } else {
+        list.push(newRecord);
+      }
+
+      list = sortLeaderboardArray(list);
+      localStorage.setItem(STORAGE_KEY_LEADERBOARD, JSON.stringify(list));
+
+      syncToGoogleSheets(newRecord);
+    }
+
+    function renderLeaderboard() {
+      let list = getStoredLeaderboard();
+      list = sortLeaderboardArray(list);
+
+      const tbody = document.getElementById('leaderboard-body');
+      const emptyNotice = document.getElementById('leaderboard-empty');
+      tbody.innerHTML = "";
+
+      if (list.length === 0) {
+        emptyNotice.classList.remove('hidden');
+        return;
+      }
+      emptyNotice.classList.add('hidden');
+
+      list.forEach((entry, index) => {
+        const rank = index + 1;
+        let rankBadge = `<span class="font-bold text-slate-400">#${rank}</span>`;
+        if (rank === 1) rankBadge = `<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-400 text-slate-950 font-black shadow-md shadow-amber-400/40">🥇</span>`;
+        if (rank === 2) rankBadge = `<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-slate-300 text-slate-950 font-black shadow-md">🥈</span>`;
+        if (rank === 3) rankBadge = `<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-700 text-white font-black shadow-md">🥉</span>`;
+
+        const row = document.createElement('tr');
+        row.className = "hover:bg-slate-800/40 transition";
+        row.innerHTML = `
+          <td class="py-3 px-3 sm:px-4 text-center font-bold">${rankBadge}</td>
+          <td class="py-3 px-3 sm:px-4 font-semibold text-white">${entry.name}</td>
+          <td class="py-3 px-2 sm:px-3 text-center"><span class="px-2 py-0.5 rounded bg-slate-800 text-cyan-300 text-[11px] font-mono">${entry.className}</span></td>
+          <td class="py-3 px-2 sm:px-3 text-center"><span class="px-2 py-0.5 rounded bg-slate-800 text-amber-300 text-[11px] font-mono">${entry.group}</span></td>
+          <td class="py-3 px-2 text-center text-slate-300 hidden md:table-cell font-mono">${entry.mt1}/10</td>
+          <td class="py-3 px-2 text-center text-slate-300 hidden md:table-cell font-mono">${entry.mt2}/5</td>
+          <td class="py-3 px-2 text-center text-slate-300 hidden md:table-cell font-mono">${entry.mt3}/6</td>
+          <td class="py-3 px-2 text-center text-slate-300 hidden md:table-cell font-mono">${entry.mt4}/4</td>
+          <td class="py-3 px-3 sm:px-4 text-center font-bold font-orbitron text-amber-300 text-base">${entry.total}</td>
+          <td class="py-3 px-3 text-center font-mono text-xs text-slate-300">${entry.durationFormatted}</td>
+          <td class="py-3 px-3 text-right text-[11px] text-slate-400 hidden lg:table-cell font-mono">${entry.submittedAt}</td>
+        `;
+        tbody.appendChild(row);
+      });
+
+      document.getElementById('last-sync-time').textContent = new Date().toLocaleTimeString('vi-VN');
+    }
+
+    function handleBackFromLeaderboard() {
+      if (AppState.isFinished) {
+        switchScreen('result-screen');
+      } else if (AppState.startTime) {
+        switchScreen('game-screen');
+      } else {
+        switchScreen('welcome-screen');
+      }
+    }
+
+    function getStoredScriptUrl() {
+      try {
+        const s = localStorage.getItem(STORAGE_KEY_SETTINGS);
+        if (s) {
+          const parsed = JSON.parse(s);
+          return parsed.scriptUrl || "";
+        }
+      } catch(e) {}
+      return "";
+    }
+
+    function saveAppsScriptUrl() {
+      const url = document.getElementById('script-url-input').value.trim();
+      const settings = { scriptUrl: url };
+      localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(settings));
+      showMessageModal("Đã lưu liên kết Google Apps Script", "Kết quả mới sẽ tự động đồng bộ sang Google Sheets.");
+    }
+
+    function syncToGoogleSheets(record) {
+      const scriptUrl = getStoredScriptUrl();
+      if (!scriptUrl) return;
+
+      const payload = {
+        timestamp: record.submittedAt,
+        name: record.name,
+        className: record.className,
+        group: record.group,
+        mt1: record.mt1,
+        mt2: record.mt2,
+        mt3: record.mt3,
+        mt4: record.mt4,
+        total: record.total,
+        duration: record.durationFormatted
+      };
+
+      fetch(scriptUrl, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      }).catch(err => console.log("Cloud sync dispatched"));
+    }
+
+    /* ============================================================
+       8. TEACHER ADMIN ENGINE
+       ============================================================ */
+    const ADMIN_PASS = "GV2026";
+
+    function openAdminModal() {
+      SoundEngine.playClick();
+      document.getElementById('admin-modal').classList.remove('hidden');
+      document.getElementById('admin-dashboard-panel').classList.add('hidden');
+      document.getElementById('admin-auth-panel').classList.remove('hidden');
+      document.getElementById('admin-pwd-input').value = "";
+    }
+
+    function closeAdminModal() {
+      document.getElementById('admin-modal').classList.add('hidden');
+    }
+
+    function verifyAdminPassword() {
+      const pwd = document.getElementById('admin-pwd-input').value.trim();
+      if (pwd === ADMIN_PASS) {
+        SoundEngine.playSuccess();
+        document.getElementById('admin-auth-panel').classList.add('hidden');
+        document.getElementById('admin-dashboard-panel').classList.remove('hidden');
+        loadAdminCandidatesTable();
+        document.getElementById('script-url-input').value = getStoredScriptUrl();
+      } else {
+        SoundEngine.playError();
+        showMessageModal("Mật khẩu không chính xác", "Vui lòng nhập đúng mật mã quản trị viên.");
+      }
+    }
+
+    function switchAdminTab(tabId) {
+      SoundEngine.playClick();
+      ['tab-candidates', 'tab-cloud'].forEach(t => {
+        document.getElementById(t).classList.add('hidden');
+      });
+      document.getElementById(tabId).classList.remove('hidden');
+
+      const tabs = [
+        { id: 'tab-candidates', btn: 'btn-tab-cand' },
+        { id: 'tab-cloud', btn: 'btn-tab-cloud' }
+      ];
+      tabs.forEach(item => {
+        const btn = document.getElementById(item.btn);
+        if (item.id === tabId) {
+          btn.className = "py-2 px-3 border-b-2 border-amber-400 text-amber-300 font-bold";
+        } else {
+          btn.className = "py-2 px-3 border-b-2 border-transparent text-slate-400 hover:text-white";
+        }
+      });
+    }
+
+    function loadAdminCandidatesTable() {
+      const list = getStoredLeaderboard();
+      document.getElementById('admin-cand-count').textContent = list.length;
+      const tbody = document.getElementById('admin-table-body');
+      tbody.innerHTML = "";
+
+      list.forEach(entry => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td class="p-2 font-semibold">${entry.name}</td>
+          <td class="p-2">${entry.className}</td>
+          <td class="p-2 font-mono text-cyan-300">${entry.group}</td>
+          <td class="p-2 font-mono">${entry.mt1} / ${entry.mt2} / ${entry.mt3} / ${entry.mt4}</td>
+          <td class="p-2 font-bold text-amber-400 font-orbitron">${entry.total}</td>
+          <td class="p-2 font-mono text-slate-400">${entry.durationFormatted}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function exportResultsCSV() {
+      const list = getStoredLeaderboard();
+      if (list.length === 0) {
+        showMessageModal("Chưa có dữ liệu", "Chưa có bài thi nào được hoàn tất để xuất file.");
+        return;
+      }
+
+      let csv = "\uFEFF";
+      csv += "Thứ hạng,Họ Tên / Đội,Lớp,Nhóm / Tổ,Mật Thư 1 (10đ),Mật Thư 2 (5đ),Mật Thư 3 (6đ),Mật Thư 4 (4đ),Tổng Điểm (25đ),Thời Gian Làm,Thời Điểm Nộp\n";
+
+      list.forEach((entry, i) => {
+        csv += `${i+1},"${entry.name}","${entry.className}","${entry.group}",${entry.mt1},${entry.mt2},${entry.mt3},${entry.mt4},${entry.total},"${entry.durationFormatted}","${entry.submittedAt}"\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `Giai_Mat_Thu_Hoa_Hoc_${new Date().toISOString().slice(0,10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function confirmResetAllData() {
+      showMessageModal(
+        "Xác nhận xóa cuộc thi?",
+        "Toàn bộ bảng xếp hạng và các phiên thi sẽ bị xóa. Thao tác này không thể hoàn tác!",
+        true
+      );
+    }
+
+    function executeWipeData() {
+      localStorage.removeItem(STORAGE_KEY_LEADERBOARD);
+      localStorage.removeItem(STORAGE_KEY_SESSION);
+      AppState = {
+        name: "",
+        className: "",
+        group: "",
+        startTime: null,
+        endTime: null,
+        currentStep: 1,
+        isFinished: false,
+        answers: { mt1: {}, mt2: "", mt3: "", mt4: {} },
+        scores: { mt1: 0, mt2: 0, mt3: 0, mt4: 0, total: 0 }
+      };
+      loadAdminCandidatesTable();
+      renderLeaderboard();
+      closeMsgModal();
+      closeAdminModal();
+      switchScreen('welcome-screen');
+    }
+
+    function switchScreen(screenId) {
+      ['welcome-screen', 'game-screen', 'result-screen', 'leaderboard-screen'].forEach(id => {
+        document.getElementById(id).classList.add('hidden');
+      });
+      document.getElementById(screenId).classList.remove('hidden');
+
+      if (screenId === 'leaderboard-screen') {
+        renderLeaderboard();
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function showMessageModal(title, desc, isConfirmReset = false) {
+      document.getElementById('msg-modal-title').textContent = title;
+      document.getElementById('msg-modal-desc').textContent = desc;
+      
+      const modal = document.getElementById('msg-modal');
+      const confirmContainer = document.getElementById('msg-modal-confirm-actions');
+      if (confirmContainer) confirmContainer.remove();
+
+      if (isConfirmReset) {
+        const div = document.createElement('div');
+        div.id = 'msg-modal-confirm-actions';
+        div.className = "flex gap-2 pt-2";
+        div.innerHTML = `
+          <button onclick="executeWipeData()" class="flex-1 py-2 bg-rose-600 hover:bg-rose-500 font-bold text-white text-xs rounded-xl">Đồng Ý Xóa</button>
+          <button onclick="closeMsgModal()" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs rounded-xl">Hủy</button>
+        `;
+        document.getElementById('msg-modal-desc').insertAdjacentElement('afterend', div);
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeMsgModal() {
+      document.getElementById('msg-modal').classList.add('hidden');
+      const confirmContainer = document.getElementById('msg-modal-confirm-actions');
+      if (confirmContainer) confirmContainer.remove();
+    }
+
+    function initBackgroundCanvas() {
+      const canvas = document.getElementById('bg-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let w, h;
+      let particles = [];
+
+      function resize() {
+        w = canvas.width = window.innerWidth;
+        h = canvas.height = window.innerHeight;
+      }
+      window.addEventListener('resize', resize);
+      resize();
+
+      class Particle {
+        constructor() {
+          this.x = Math.random() * w;
+          this.y = Math.random() * h;
+          this.radius = Math.random() * 1.8 + 0.5;
+          this.vx = (Math.random() - 0.5) * 0.4;
+          this.vy = (Math.random() - 0.5) * 0.4;
+          this.alpha = Math.random() * 0.5 + 0.2;
+        }
+        update() {
+          this.x += this.vx;
+          this.y += this.vy;
+          if (this.x < 0) this.x = w;
+          if (this.x > w) this.x = 0;
+          if (this.y < 0) this.y = h;
+          if (this.y > h) this.y = 0;
+        }
+        draw() {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(0, 242, 254, ${this.alpha})`;
+          ctx.fill();
+        }
+      }
+
+      for (let i = 0; i < 45; i++) {
+        particles.push(new Particle());
+      }
+
+      function animate() {
+        ctx.clearRect(0, 0, w, h);
+        for (let i = 0; i < particles.length; i++) {
+          particles[i].update();
+          particles[i].draw();
+          for (let j = i + 1; j < particles.length; j++) {
+            const dx = particles[i].x - particles[j].x;
+            const dy = particles[i].y - particles[j].y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < 110) {
+              ctx.beginPath();
+              ctx.moveTo(particles[i].x, particles[i].y);
+              ctx.lineTo(particles[j].x, particles[j].y);
+              ctx.strokeStyle = `rgba(138, 43, 226, ${0.12 * (1 - dist / 110)})`;
+              ctx.stroke();
+            }
+          }
+        }
+        requestAnimationFrame(animate);
+      }
+      animate();
+    }
+  </script>
+</body>
+</html>
